@@ -1,0 +1,67 @@
+<HR color=#987cb9 SIZE=2>
+  群组：
+  <ul id="groupbox">
+      <li>-----------</li>
+  </ul> 
+<HR color=#987cb9 SIZE=2>
+<form align="center" action="#" method="post">
+  群组名：<input name="group_name" type="text" />
+  <input type = "button" name = "create_button" value="创建群组" /> 
+</form>     
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+<script src="util.js"></script>
+
+<script>
+$(document).ready(function () {
+    var id = GetQueryValue("id")
+    $.ajax({
+        url : "http://127.0.0.1:8081/get_group_chat",
+        type : "post",
+        contentType: "application/x-www-form-urlencoded",
+        success : function(res){
+            if (res.Type == 1) {
+                $.each(res.Groups, function(i, data){
+                  var li = document.createElement('li');
+                  var button = document.createElement('button');
+                  li.innerText = data + "\xa0\xa0\xa0\xa0";
+                  button.innerText = "加入群聊";
+                  button.setAttribute("class", "group_button")
+                  button.setAttribute("data-id", i)
+                  li.appendChild(button)
+                  $('#groupbox li').last().after(li);
+                });
+            }
+        },
+        error : function(res){
+            console.log(res);       
+        }
+    });    
+
+    //加入群聊
+    $(document).on("click", ".group_button", function (e) {
+        group_id = $(this).attr("data-id");
+        if (group_id > 0 ){
+            window.location.href = "group_chat_room.html?id=" + id + "&group_id="+group_id;
+        }else{
+            alert("该群组不存在")
+        }
+    })
+
+    //创建群聊
+    $('input[name=create_button]').click(function(){
+        var group_name = $('input[name=group_name]').val();
+        if (group_name === "" || group_name == null){
+            alert("请输入群组名");
+            return;
+        }        
+        $.post("http://127.0.0.1:8081/add_group_chat", {id:id, group_name:group_name}, function(data, state, xhr){
+            if (data.Type == 1) {
+                window.location.href = data.Url;
+            }else{
+                alert(data.Msg)
+            }
+        }, "json");
+    });
+});
+
+</script>

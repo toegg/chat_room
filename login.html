@@ -1,0 +1,57 @@
+<form action="#" method="" id="user">
+	id：<input name="id" type="text" />
+  name：<input name="name" type="text" />
+  <select id = "room_type" name = "room_type">
+    <option value = 1>大聊天室</option>
+    <option value = 2>群聊</option>
+    <!-- <option value = 3>一对一</option> -->
+  </select>
+	<input type = "button" name = "button" value="提交" />
+</form>
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+
+<script>
+$('input[name=button]').click(function(){
+    var id = $('input[name=id]').val();
+    var name = $('input[name=name]').val();
+    var room_type = $("#room_type").val();
+    // console.log(id + ":" + name + ":" + room_type)
+    let arr = ["1001", "1002", "1003"];
+
+　　　if(id === "" || id == null || name === "" || name == null){
+        alert("请输入信息");
+        return;
+    }
+    if (arr.includes(id) || id <= 0) {
+        alert("无法使用该id");
+        return;
+    }
+    if(isNaN( id )){　　　　
+        alert("id需为数字");
+　　　    return; 
+    }
+    $.ajax({
+        url : "http://127.0.0.1:8081/join",
+        type : "post",
+        dataType : "json",
+        contentType: "application/x-www-form-urlencoded",
+        data : { id:id, name:name, room_type:room_type},
+        success : function(res){
+            console.log(res);
+            if (res.Type == 1) {
+                window.location.href = res.Url;
+            }else if(res.Type == 2) {
+                alert("该id已有用户使用");
+            }else if(res.Type == 3) {
+                alert("该名字已有用户使用");
+            }else{
+                alert("error");
+            }
+        },
+        error : function(res){
+            console.log(res); 
+            alert("error")      
+        }
+    });
+});
+</script>

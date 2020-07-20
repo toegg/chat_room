@@ -1,0 +1,94 @@
+<HR color=#987cb9 SIZE=2>
+  群组用户：
+  <ul id="rolebox">
+      <li>-----------</li>
+  </ul> 
+<HR color=#987cb9 SIZE=2>
+  聊天室信息：
+  <ul id="chatbox">
+      <li>welcome to chat room</li>
+  </ul> 
+<HR color=#987cb9 SIZE=2>
+<form align="center" action="#" method="post">
+  <textarea id = "content" name="content" type="text" rows="10" cols="50"></textarea>
+  <input type = "button" name = "button" value="发送" /> 
+</form>
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+<script src="util.js"></script>
+
+<script>
+$(document).ready(function () {
+    var id = GetQueryValue("id")
+    var group_id = GetQueryValue("group_id")
+
+    socket = new WebSocket('ws://localhost:8081/group_chat');
+    socket.onopen = function (event) {
+        socket.send("1001=" + id + "=" + group_id +"\n");
+    };
+
+    socket.onerror = function(event){
+        console.log(event);
+    };
+
+    socket.onmessage = function (event) {
+        var data = JSON.parse(event.data);
+        console.log(data);
+
+        //1:接收信息；2:接收用户；3:移除用户; 10:强制退出
+        switch (data.Type) {
+        case 1: 
+            $.each(data.Msg, function(i, data1){
+              var li = document.createElement('li');
+              li.innerText = data1;
+              $('#chatbox li').first().before(li);
+            });
+            break;
+        case 2:
+            $.each(data.Roles, function(i, data1){
+              var li = document.createElement('li');
+              li.innerText = data1;
+              li.setAttribute("id", i)
+              $('#rolebox li').last().after(li);
+            });
+            break;
+        case 3:
+            $.each(data.Roles, function(i, data1){
+              var li = document.getElementById(i)
+              li.remove();
+            });
+            break;
+        case 10:
+            window.location.href = data.Url;
+            break;
+        }
+    };
+
+    //发送消息
+    var postConecnt = function () {
+        var content = $('#content').val();
+        if (content === "" || content == null){
+            alert("请输入信息");
+            return;
+        }
+        socket.send("1002=" + content + "=" + group_id + "\n");
+    }
+    $('input[name=button]').click(function () {
+        postConecnt();
+    });
+
+    //监控关闭界面
+    var beginTime = 0;//执行onbeforeunload的开始时间
+    var differTime = 0;//时间差
+    window.onunload = function (){
+        differTime = new Date().getTime() - beginTime;
+        if(differTime <= 5) {
+            //监听关闭标签页触发事件
+          socket.send("1003\n");
+        }
+
+    }
+    window.onbeforeunload = function (){
+       beginTime = new Date().getTime();
+    };
+});
+</script>
