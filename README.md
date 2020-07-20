@@ -4,5 +4,9 @@
   服务器用的端口号为8081，禁用则需放开<br>
 2.直接网页打开login.html即可<br>
 3.服务器代码为server.go, 本地有go环境, 可调整相关代码, go run 源文件重启<br>
+  如需调整server.go代码需要下载websocket库<br>
+  步骤:<br>
+  go get -u github.com/golang/net/websocket<br>
+  完了之后把websocket复制到golang.org/x/net/websocket即可使用<br>
 
-简单的练习代码，勿喷
+简单的练习代码，勿喷！！
